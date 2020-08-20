@@ -13,10 +13,6 @@ my $preop = 'true;';
   #'perldoc -uT $(VERSION_FROM) | tee $(DISTVNAME)/README.pod > README.pod;' .
   #'pod2text README.pod | tee $(DISTVNAME)/README > README';
 
-# Execute something before `make`
-my $preBuild=
-  '';
-
 WriteMakefile1(
   NAME         => 'Endopep_peaks',
   VERSION_FROM => "scripts/parseBruker.pl",
@@ -24,9 +20,6 @@ WriteMakefile1(
   EXE_FILES    => [
     "scripts/parseBruker.pl",
   ],
-  BEFORE_BUILD=> {
-    exec => $preBuild,
-  },
   PREREQ_PM    => {
     # Core modules
     'File::Basename' => 0,
@@ -41,7 +34,7 @@ WriteMakefile1(
     'Test::More'     => 0.47,
   },
   MIN_PERL_VERSION => '5.16.0',
-  LICENSE          => "gpl_3",
+  LICENSE          => "mit",
   dist=>{
     COMPRESS => "gzip -9f",
     SUFFIX   => "gz",
@@ -83,15 +76,6 @@ sub WriteMakefile1 {  #Compatibility code for old versions of EU::MM. Written by
   delete $params{META_MERGE} if $eumm_version < 6.46;
   delete $params{META_ADD} if $eumm_version < 6.46;
   delete $params{LICENSE} if $eumm_version < 6.31;
-
-  # LK
-  if(defined($params{BEFORE_BUILD})){
-    if(defined($params{BEFORE_BUILD}{exec})){
-      system($params{BEFORE_BUILD}{exec});
-      die if $?;
-    }
-    delete($params{BEFORE_BUILD});
-  }
 
   WriteMakefile(%params);
 }
