@@ -14,6 +14,8 @@ use lib "$RealBin/../lib/perl5";
 use Spreadsheet::XLSX;
 use Array::IntSpan;
 
+our $VERSION = 0.1;
+
 # Expected peaks per serotype
 my $peakRanges = Array::IntSpan->new();
 
