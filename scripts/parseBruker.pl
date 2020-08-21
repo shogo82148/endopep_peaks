@@ -14,7 +14,7 @@ use lib "$RealBin/../lib/perl5";
 use Spreadsheet::XLSX;
 use Array::IntSpan;
 
-our $VERSION = 3.0;
+our $VERSION = '3.1';
 
 # Expected peaks per serotype
 my $peakRanges = Array::IntSpan->new();
@@ -57,8 +57,9 @@ exit(main());
 
 sub main{
   my $settings={};
-  GetOptions($settings,qw(help)) or die $!;
-  die usage() if($$settings{help} || !@ARGV);
+  GetOptions($settings,qw(version help)) or die $!;
+  version() if($$settings{version});
+  usage() if($$settings{help} || !@ARGV);
 
   # print off the output header
   print "plate\tisolate\t";
@@ -202,9 +203,17 @@ sub readRawSpreadsheet{
   return \%finalTsv;
 }
 
+sub version{
+  print "$0 $VERSION";
+  exit 0;
+}
+
 sub usage{
+  print
   "$0: runs the endopep peaks workflow
   Usage: $0 [options] spreadsheet.xlsx [spreadsheet2.xlsx...]
-  --help   This useful help menu
-  "
+  --help     This useful help menu
+  --version  Print the version and exit
+  ";
+  exit 0;
 }

@@ -23,3 +23,11 @@ Sends a tsv file to stdout
 
     parseBruker.pl exampleData/02.24.20/022420_JD_raw.xlsx > spreadsheet.tsv
 
+Usage menu
+
+    parseBruker.pl --help
+
+Version
+    
+    parseBruker.pl --version
+
