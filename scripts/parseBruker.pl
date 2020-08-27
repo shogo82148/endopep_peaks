@@ -71,15 +71,18 @@ sub main{
     my $tsv = readRawSpreadsheet($spreadsheet, $settings);
     
     while(my($plate, $plateEntries) = each(%$tsv)){
-      while(my($sample, $sampleInfo) = each(%$plateEntries)){
-        # the sample has multiple acquisitions in the data structure,
-        # so there will be one row printed per acquisition.
+      # Loop through the samples but sort them alphabetically
+      for my $sample(sort {$a cmp $b} keys(%$plateEntries)){
+        my $sampleInfo = $$plateEntries{$sample};
         
         # How many acquisitions are there?
         # Each peak will have the same number of acquisitions,
         # and so just get that info from the first peak found.
         my $firstPeak = (keys(%$sampleInfo))[0];
         my $numAcquisitions = scalar(@{ $$sampleInfo{$firstPeak} });
+        
+        # the sample has multiple acquisitions in the data structure,
+        # so there will be one row printed per acquisition.
         for(my $acquisition=1; $acquisition <= $numAcquisitions; $acquisition++){
           print join("\t", $plate, $sample, $acquisition);
           # Increment by two because the header has both the peak and peak_SN keys
