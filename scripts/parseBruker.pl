@@ -14,7 +14,7 @@ use lib "$RealBin/../lib/perl5";
 use Spreadsheet::XLSX;
 use Array::IntSpan;
 
-our $VERSION = '3.1';
+our $VERSION = '3.2';
 
 # Expected peaks per serotype
 my $peakRanges = Array::IntSpan->new();
@@ -62,7 +62,7 @@ sub main{
   usage() if($$settings{help} || !@ARGV);
 
   # print off the output header
-  print "plate\tisolate\t";
+  print "plate\tsample\tacquisition\t";
   print join("\t",@typingHeader);
   print "\n";
 
@@ -71,16 +71,27 @@ sub main{
     my $tsv = readRawSpreadsheet($spreadsheet, $settings);
     
     while(my($plate, $plateEntries) = each(%$tsv)){
-      while(my($bot_id, $botInfo) = each(%$plateEntries)){
-        print join("\t", $plate, $bot_id);
-        for(my $i=0;$i<@typingHeader;$i+=2){
-          # Get the peaks hash (signal-to-noise and peak)
-          my $peakInfo = $$botInfo{$typingHeader[$i]};
-          # Set a default for the hash if it's missing for this type
-          $peakInfo ||= {peak=>".", SN=>"."};
-          print "\t".$$peakInfo{peak}."\t".$$peakInfo{SN};
+      while(my($sample, $sampleInfo) = each(%$plateEntries)){
+        # the sample has multiple acquisitions in the data structure,
+        # so there will be one row printed per acquisition.
+        
+        # How many acquisitions are there?
+        # Each peak will have the same number of acquisitions,
+        # and so just get that info from the first peak found.
+        my $firstPeak = (keys(%$sampleInfo))[0];
+        my $numAcquisitions = scalar(@{ $$sampleInfo{$firstPeak} });
+        for(my $acquisition=1; $acquisition <= $numAcquisitions; $acquisition++){
+          print join("\t", $plate, $sample, $acquisition);
+          # Increment by two because the header has both the peak and peak_SN keys
+          for(my $i=0;$i<@typingHeader;$i+=2){
+            # Get the peaks hash (signal-to-noise and peak)
+            my $peakInfo = $$sampleInfo{$typingHeader[$i]}[$acquisition];
+            # Set a default for the hash if it's missing for this type
+            $peakInfo ||= {peak=>".", SN=>"."};
+            print "\t".$$peakInfo{peak}."\t".$$peakInfo{SN};
+          }
+          print "\n";
         }
-        print "\n";
       }
     }
 
@@ -103,7 +114,7 @@ sub readRawSpreadsheet{
 
     # Initialize variables for columns in the
     # single-sheet intermediate file
-    my($date, $plate, $bot_id,$Peak_1_A, $sn_Peak_1_A, $Peak_2_A, $sn_Peak_2_A, $Intact_A, $sn_Intact_A, $Peak_1_B, $sn_Peak_1_B, $Peak_2_B, $sn_Peak_2_B, $Intact_B, $sn_Intact_B, $Peak_1_E, $sn_Peak_1_E, $Peak_2_E, $sn_Peak_2_E, $Intact_E, $sn_Intact_E, $Peak_1_F, $sn_Peak_1_F, $Peak_2_F, $sn_Peak_2_F, $Intact_F, $sn_Intact_F);
+    my($date, $plate, $sample,$Peak_1_A, $sn_Peak_1_A, $Peak_2_A, $sn_Peak_2_A, $Intact_A, $sn_Intact_A, $Peak_1_B, $sn_Peak_1_B, $Peak_2_B, $sn_Peak_2_B, $Intact_B, $sn_Intact_B, $Peak_1_E, $sn_Peak_1_E, $Peak_2_E, $sn_Peak_2_E, $Intact_E, $sn_Intact_E, $Peak_1_F, $sn_Peak_1_F, $Peak_2_F, $sn_Peak_2_F, $Intact_F, $sn_Intact_F);
 
     my @header; #header columns
 
@@ -133,8 +144,8 @@ sub readRawSpreadsheet{
 
         # Parse the line with Spectrum: D:\Data\CLIA\2020\02-21-20\Plate 169380\2000001 Pl-6-A\0_A3\1\1SLin
         if($value =~ /Plate\s+(.+?)\\(.+?)\\/){
-          $plate  = $1;
-          $bot_id = $2;
+          $plate  = $2;
+          $sample = $1;
         }
 
         # We're looking at the header row if we come across m/z
@@ -155,6 +166,8 @@ sub readRawSpreadsheet{
           @tsvrow{@header} = @tsvValue;
           $tsvrow{row} = $row;
           $tsv{$tsvValue[0]} = \%tsvrow;
+          #push(@{ $tsv{$tsvValue[0]} }, \%tsvrow);
+          #die Dumper $tsvValue[0],\%tsvrow;
           next ROW;
         }
       }
@@ -165,38 +178,51 @@ sub readRawSpreadsheet{
       if(!$plate){
         die "ERROR: did not find plate ID on tab ".$sheet->{Name};
       }
-      if(!$bot_id){
+      if(!$sample){
         die "ERROR: did not find bot ID on tab ".$sheet->{Name};
       }
-      $peakInfo{$bot_id}{$plate} = \%tsv;
+
+      # There are multiple acquisitions per sample per
+      # plate and so it needs to be captured in an array.
+      push(@{ $peakInfo{$sample}{$plate} }, \%tsv);
     }
   }
+  #die Dumper keys(%{ $peakInfo{157016} });
 
-  # Turn this into a 25+ column format with each peak info shown on each plate/bot_id combo line
+  # Turn this into a 25+ column format with each peak info shown on each plate/sample combo line
   my %finalTsv;
   while(my($plate, $plateInfo) = each(%peakInfo)){
-    while(my($bot_id, $botInfo) = each(%$plateInfo)){
-      my @peak;
-      my @sortedPeakInfo = sort {
-        $$botInfo{$a}{row}||=0;
-        $$botInfo{$b}{row}||=0;
-        $$botInfo{$a}{row} <=> $$botInfo{$b}{row}
-      } values(%$botInfo);
-      for my $peak(@sortedPeakInfo){
-        # Find which type this belongs to based on ranges of m/z
-        my $type = $peakRanges->lookup($$peak{'m/z'});
-        # If not found in the ranges, UNDEFINED
-        $type||="UNDEFINED_PEAK";
+    while(my($sample, $sampleInfoArr) = each(%$plateInfo)){
+      for my $sampleInfo(@$sampleInfoArr){
+        my @peak;
+        my @sortedPeakInfo = sort {
+          $$sampleInfo{$a}{row}||=0;
+          $$sampleInfo{$b}{row}||=0;
+          $$sampleInfo{$a}{row} <=> $$sampleInfo{$b}{row}
+        } values(%$sampleInfo);
+        for my $peak(@sortedPeakInfo){
+          # Find which type this belongs to based on ranges of m/z
+          my $type = $peakRanges->lookup($$peak{'m/z'});
+          # If not found in the ranges, UNDEFINED
+          $type||="UNDEFINED_PEAK";
 
-        # Record this peak under the right type
-        my %info = (
-          peak  => $$peak{'m/z'},
-          SN    => $$peak{SN},
-        );
-        $finalTsv{$plate}{$bot_id}{$type} = \%info;
+          # Record this peak under the right type
+          my %info = (
+            peak  => $$peak{'m/z'},
+            SN    => $$peak{SN},
+            type  => $type,
+          );
 
-        #TODO what to do if multiple undefined peaks? Do we care?
+          # There are multiple acquisitions per sample per
+          # plate and so each peak could have multiple
+          # values; transform these data into an array.
+          #$finalTsv{$plate}{$sample}{$type} = \%info;
+          push(@{ $finalTsv{$plate}{$sample}{$type} }, \%info);
+
+          #TODO what to do if multiple undefined peaks? Do we care?
+        }
       }
+      #die Dumper \%finalTsv;
     }
   }
 
@@ -214,6 +240,6 @@ sub usage{
   Usage: $0 [options] spreadsheet.xlsx [spreadsheet2.xlsx...]
   --help     This useful help menu
   --version  Print the version and exit
-  ";
+";
   exit 0;
 }
