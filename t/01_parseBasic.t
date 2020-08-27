@@ -16,13 +16,18 @@ my $tmpdir = "$scriptDir/tmp";
 mkdir $tmpdir;
 
 subtest 'basic' => sub{
-  plan tests => 1;
+  plan tests => 5;
 
-  system("parseBruker.pl $scriptDir/raw/01.08.2020.AOH.Raw.xlsx > $tmpdir/01.08.2020.AOH.Raw.tsv");
-  my $expected = readTsv("$scriptDir/expected/01.08.2020.AOH.Raw.tsv");
-  my $observed = readTsv("$tmpdir/01.08.2020.AOH.Raw.tsv");
+  # Parse each raw file and see if we get what's expected
+  for my $rawfile(glob("$scriptDir/raw/*.xlsx")){
+    my $target = "$tmpdir/".basename($rawfile,".xlsx").".tsv";
+    my $expectedfile = "$scriptDir/expected/".basename($rawfile,".xlsx").".tsv";
+    system("parseBruker.pl $rawfile > $target");
+    my $expected = readTsv($expectedfile);
+    my $observed = readTsv($target);
 
-  is_deeply($observed, $expected, "Convert 01.08.2020.AOH.Raw.tsv");
+    is_deeply($observed, $expected, "Check $rawfile against $expectedfile");
+  }
 
 };
 
@@ -43,6 +48,8 @@ sub readTsv{
     @F{@header} = @F;
 
     # The special key for these spreadsheets is plate + isolate
+    # Use a triple tilde because it probably is not in any
+    # sample name or plate name.
     my $key = join("~~~", $F{plate}, $F{sample});
 
     $tsv{$key} = \%F;
