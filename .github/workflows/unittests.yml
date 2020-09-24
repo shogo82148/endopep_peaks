@@ -37,13 +37,11 @@ jobs:
       - id:  cpanm
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
-#          for path in $(cat $HOME/CPANMDIRs.txt); do echo "Added cpanm $path"; export PATH=$path:$PATH; done
           which cpanm
           cpanm -l $HOME --installdeps --verbose --force .
           cpanm -l $HOME File::Which --force --notest --verbose
           cpanm -l $HOME Spreadsheet::XLSX --force --notest --verbose  
           cpanm -l $HOME Array::IntSpan --force --notest --verbose
-#          find $HOME -name Which.pm || true
           perl -MFile::Which -MData::Dumper -MSpreadsheet::XLSX -MArray::IntSpan -e 'print Dumper \%INC'
       - id: prove-lv-t
         run: |
