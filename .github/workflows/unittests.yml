@@ -27,7 +27,7 @@ jobs:
       - id:  install-cpanm
         run: |
           curl -L https://cpanmin.us | perl - --sudo App::cpanminus
-          cp -v /usr/local/bin/cpanm $(which cpanm)
+          find /bin /usr/ $HOME $GITHUB_WORKSPACE -name cpanm
           which cpanm
       - id:  cpanm
         run: |
