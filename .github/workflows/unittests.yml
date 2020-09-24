@@ -33,7 +33,7 @@ jobs:
           #find /bin /usr/ $HOME $GITHUB_WORKSPACE -name cpanm -exec {} --version \;
           which cpanm
           CPANMPATH=$(which cpanm)
-          find $HOME/.cpanm -type -f -executable -name cpanm -exec cp -v {} $CPANMPATH \;
+          find $HOME/.cpanm -type f -executable -name cpanm -exec cp -v {} $CPANMPATH \;
       - id:  cpanm
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
