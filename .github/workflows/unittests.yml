@@ -23,10 +23,13 @@ jobs:
         with:
           perl-version: ${{ matrix.perl }}
       - run: perl -V
-      #- run: cpanm --installdeps .
-      - run: cpanm -l $GITHUB_WORKSPACE --installdeps .
+      - id:  cpanm
+        run: |
+          cd $GITHUB_WORKSPACE
+          cpanm -l . --installdeps --verbose .
       - id: prove-lv-t
         run: |
-          export PERL5LIB=$PERL5LIB:$GITHUB_WORKSPACE/lib/perl5; echo $PERL5LIB;
+          export PERL5LIB=$PERL5LIB:$GITHUB_WORKSPACE/lib/perl5
           echo $PERL5LIB
+          locate Which.pm
           prove -lv t
