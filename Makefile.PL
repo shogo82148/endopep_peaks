@@ -29,6 +29,7 @@ WriteMakefile1(
     'FindBin'        => 0,
     # Not core 
     'Spreadsheet::XLSX' => 0,
+    'Excel::Writer::XLSX' => 0,
     'Array::IntSpan'    => '2.004',
   },
   BUILD_REQUIRES => {
