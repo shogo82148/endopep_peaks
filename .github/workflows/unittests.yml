@@ -29,6 +29,9 @@ jobs:
           echo "CPANM - start"
           cpanm -l $HOME --installdeps --verbose --force .
           echo "CPANM - done"
+          echo "CPANM - start direct installation of File::Which"
+          cpanm -l $HOME File::Which --force --notest
+          echo "CPANM - done"
           locate Which.pm || true
           find $HOME -name Which.pm || true
           perl -MFile::Which -MData::Dumper -e 'print Dumper \%INC'
