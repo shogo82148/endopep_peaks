@@ -36,9 +36,9 @@ jobs:
           find $HOME/.cpanm -type f -executable -name cpanm | xargs -P 1 -n 1 bash -c '
             dirname $0
           ' > $HOME/CPANMDIRs.txt
-          for path in $(cat $HOME/CPANMDIRs.txt); do
-            export PATH=$path:$PATH
-          done
+          for path in $(cat $HOME/CPANMDIRs.txt); do echo "Added $path"; export PATH=$path:$PATH; done
+          echo $PATH
+          exit 1 # stop here for now
       - id:  cpanm
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
