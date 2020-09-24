@@ -15,7 +15,7 @@ use Spreadsheet::XLSX;
 #use Excel::Writer::XLSX;
 use Array::IntSpan;
 
-our $VERSION = '3.2';
+our $VERSION = '3.2.1';
 
 # Expected peaks per serotype
 my $peakRanges = Array::IntSpan->new();
