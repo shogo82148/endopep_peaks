@@ -25,12 +25,12 @@ jobs:
       - run: perl -V
       - id:  cpanm
         run: |
-          cd $GITHUB_WORKSPACE
-          cpanm -l . --installdeps --verbose --force .
+          export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
+          cpanm -l $HOME --installdeps --verbose --force .
           perl -MFile::Which -MData::Dumper -e 'print Dumper \%INC' || true
       - id: prove-lv-t
         run: |
-          export PERL5LIB=$PERL5LIB:$GITHUB_WORKSPACE/lib/perl5
+          export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
           echo $PERL5LIB
           locate Which.pm || true
           find $GITHUB_WORKSPACE -name Which.pm || true
