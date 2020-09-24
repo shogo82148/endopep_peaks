@@ -37,11 +37,10 @@ jobs:
           for path in $(cat $HOME/CPANMDIRs.txt); do echo "Added $path"; export PATH=$path:$PATH; done
           echo $PATH
           which cpanm
-          exit 1 # stop here for now
       - id:  cpanm
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
-          export PATH=$PATH:/usr/local/bin
+          for path in $(cat $HOME/CPANMDIRs.txt); do echo "Added cpanm $path"; export PATH=$path:$PATH; done
           which cpanm
           echo "CPANM - start"
           cpanm -l $HOME --installdeps --verbose --force .
