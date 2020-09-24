@@ -4,13 +4,22 @@ use strict;
 use warnings;
 use lib './lib';
 use File::Basename qw/dirname basename/;
+use File::Which qw/which/;
 use Getopt::Long qw/GetOptions/;
 
 use Test::More tests => 1;
 
 my $scriptDir = dirname $0;
 local $0 = basename $0;
-$ENV{PATH}="$0/../scripts:$ENV{PATH}";
+$ENV{PATH}="$scriptDir/../scripts:$ENV{PATH}";
+
+my $parseBruker = which("parseBruker.pl");
+if(! -e $parseBruker){
+  note "PATH is";
+  note "  $ENV{PATH}";
+  BAIL_OUT("Could not find parseBruker.pl in PATH");
+}
+note "executable is at $parseBruker";
 
 my $tmpdir = "$scriptDir/tmp";
 mkdir $tmpdir;
