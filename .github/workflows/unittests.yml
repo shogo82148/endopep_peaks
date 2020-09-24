@@ -29,11 +29,10 @@ jobs:
           echo "CPANM - start"
           cpanm -l $HOME --installdeps --verbose --force .
           echo "CPANM - done"
-          perl -MFile::Which -MData::Dumper -e 'print Dumper \%INC' || true
+          locate Which.pm || true
+          find $HOME -name Which.pm || true
+          perl -MFile::Which -MData::Dumper -e 'print Dumper \%INC'
       - id: prove-lv-t
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
-          echo $PERL5LIB
-          locate Which.pm || true
-          find $GITHUB_WORKSPACE -name Which.pm || true
           prove -lv t
