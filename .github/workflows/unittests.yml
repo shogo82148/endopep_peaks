@@ -27,10 +27,13 @@ jobs:
       - id:  install-cpanm
         run: |
           curl -L https://cpanmin.us | perl - App::cpanminus
+          # installs to something like /home/runner/.cpanm/work/1600962463.2588/App-cpanminus-1.7044/bin/cpanm
           #curl -L https://cpanmin.us | perl - --sudo App::cpanminus
-          find /bin /usr/ $HOME $GITHUB_WORKSPACE -name cpanm | xargs ls -lht
-          find /bin /usr/ $HOME $GITHUB_WORKSPACE -name cpanm -exec {} --version \;
+          #find /bin /usr/ $HOME $GITHUB_WORKSPACE -name cpanm | xargs ls -lht
+          #find /bin /usr/ $HOME $GITHUB_WORKSPACE -name cpanm -exec {} --version \;
           which cpanm
+          CPANMPATH=$(which cpanm)
+          find $HOME/.cpanm -type -f -executable -name cpanm -exec cp -v {} $CPANMPATH \;
       - id:  cpanm
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
