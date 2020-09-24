@@ -23,6 +23,7 @@ WriteMakefile1(
   PREREQ_PM    => {
     # Core modules
     'File::Basename' => 0,
+    'File::Which'    => 0,
     'Data::Dumper'   => 0,
     'Getopt::Long'   => 0,
     'FindBin'        => 0,
