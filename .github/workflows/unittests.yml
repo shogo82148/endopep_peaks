@@ -23,10 +23,11 @@ jobs:
         with:
           perl-version: ${{ matrix.perl }}
       - run: perl -V
+      - run: env
       - id:  install-cpanm
         run: |
           curl -L https://cpanmin.us | perl - --sudo App::cpanminus
-          export PATH=$PATH:/usr/local/bin
+          cp -v /usr/local/bin/cpanm $(which cpanm)
           which cpanm
       - id:  cpanm
         run: |
