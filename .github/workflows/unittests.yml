@@ -26,4 +26,5 @@ jobs:
       #- run: cpanm --installdeps .
       - run: cpanm -l $GITHUB_WORKSPACE --installdeps .
       - run: export PERL5LIB=$PERL5LIB:$GITHUB_WORKSPACE/lib/perl5
+      - run: echo $PERL5LIB
       - run: prove -lv t
