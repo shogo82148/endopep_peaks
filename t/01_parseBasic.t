@@ -31,7 +31,7 @@ subtest 'basic' => sub{
   for my $rawfile(glob("$scriptDir/raw/*.xlsx")){
     my $target = "$tmpdir/".basename($rawfile,".xlsx").".tsv";
     my $expectedfile = "$scriptDir/expected/".basename($rawfile,".xlsx").".tsv";
-    system("parseBruker.pl $rawfile > $target");
+    system("$parseBruker $rawfile > $target");
     my $expected = readTsv($expectedfile);
     my $observed = readTsv($target);
 

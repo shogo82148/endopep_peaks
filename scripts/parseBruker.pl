@@ -12,6 +12,7 @@ use lib "$RealBin/../lib/perl5";
 
 # Optional modules that are not standard
 use Spreadsheet::XLSX;
+use Excel::Writer::XLSX;
 use Array::IntSpan;
 
 our $VERSION = '3.2';
@@ -83,8 +84,8 @@ sub main{
         
         # the sample has multiple acquisitions in the data structure,
         # so there will be one row printed per acquisition.
-        for(my $acquisition=1; $acquisition <= $numAcquisitions; $acquisition++){
-          print join("\t", $plate, $sample, $acquisition);
+        for(my $acquisition=0; $acquisition < $numAcquisitions; $acquisition++){
+          print join("\t", $plate, $sample, ($acquisition+1));
           # Increment by two because the header has both the peak and peak_SN keys
           for(my $i=0;$i<@typingHeader;$i+=2){
             # Get the peaks hash (signal-to-noise and peak)
@@ -190,12 +191,14 @@ sub readRawSpreadsheet{
       push(@{ $peakInfo{$sample}{$plate} }, \%tsv);
     }
   }
+  #die Dumper \%peakInfo;
   #die Dumper keys(%{ $peakInfo{157016} });
 
   # Turn this into a 25+ column format with each peak info shown on each plate/sample combo line
   my %finalTsv;
   while(my($plate, $plateInfo) = each(%peakInfo)){
-    while(my($sample, $sampleInfoArr) = each(%$plateInfo)){
+    while(my($sampleAndSerotype, $sampleInfoArr) = each(%$plateInfo)){
+      my($sample, $serotype) = split(/\-/, $sampleAndSerotype);
       for my $sampleInfo(@$sampleInfoArr){
         my @peak;
         my @sortedPeakInfo = sort {
@@ -214,6 +217,7 @@ sub readRawSpreadsheet{
             peak  => $$peak{'m/z'},
             SN    => $$peak{SN},
             type  => $type,
+            serotype => $serotype,
           );
 
           # There are multiple acquisitions per sample per
@@ -228,6 +232,7 @@ sub readRawSpreadsheet{
       #die Dumper \%finalTsv;
     }
   }
+  #die Dumper \%finalTsv;
 
   return \%finalTsv;
 }
