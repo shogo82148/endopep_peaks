@@ -24,5 +24,6 @@ jobs:
           perl-version: ${{ matrix.perl }}
       - run: perl -V
       #- run: cpanm --installdeps .
-      - run: cpanm -l . --installdeps .
+      - run: cpanm -l $GITHUB_WORKSPACE --installdeps .
+      - run: export PERL5LIB=$PERL5LIB:$GITHUB_WORKSPACE/lib/perl5
       - run: prove -lv t
