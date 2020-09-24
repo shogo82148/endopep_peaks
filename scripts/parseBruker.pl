@@ -12,7 +12,7 @@ use lib "$RealBin/../lib/perl5";
 
 # Optional modules that are not standard
 use Spreadsheet::XLSX;
-use Excel::Writer::XLSX;
+#use Excel::Writer::XLSX;
 use Array::IntSpan;
 
 our $VERSION = '3.2';
