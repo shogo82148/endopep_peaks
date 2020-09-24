@@ -25,32 +25,26 @@ jobs:
       - run: perl -V
       - run: env
       - id:  install-cpanm
-        run: |
-          curl -L https://cpanmin.us | perl - App::cpanminus
-          # installs to something like /home/runner/.cpanm/work/1600962463.2588/App-cpanminus-1.7044/bin/cpanm
-          #curl -L https://cpanmin.us | perl - --sudo App::cpanminus
-          #find /bin /usr/ $HOME $GITHUB_WORKSPACE -name cpanm | xargs ls -lht
-          #find /bin /usr/ $HOME $GITHUB_WORKSPACE -name cpanm -exec {} --version \;
-          which cpanm
-          CPANMPATH=$(which cpanm)
-          find $HOME/.cpanm -type f -executable -name cpanm | xargs -P 1 -n 1 bash -c ' echo "dir of $0" >&2; dirname $0 ' | tee $HOME/CPANMDIRs.txt
-          for path in $(cat $HOME/CPANMDIRs.txt); do echo "Added $path"; export PATH=$path:$PATH; done
-          echo $PATH
-          which cpanm
+#        run: |
+#          curl -L https://cpanmin.us | perl - App::cpanminus
+#          # installs to something like /home/runner/.cpanm/work/1600962463.2588/App-cpanminus-1.7044/bin/cpanm
+#          which cpanm
+#          CPANMPATH=$(which cpanm)
+#          find $HOME/.cpanm -type f -executable -name cpanm | xargs -P 1 -n 1 bash -c ' echo "dir of $0" >&2; dirname $0 ' | tee $HOME/CPANMDIRs.txt
+#          for path in $(cat $HOME/CPANMDIRs.txt); do echo "Added $path"; export PATH=$path:$PATH; done
+#          echo $PATH
+#          which cpanm
       - id:  cpanm
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
-          for path in $(cat $HOME/CPANMDIRs.txt); do echo "Added cpanm $path"; export PATH=$path:$PATH; done
+#          for path in $(cat $HOME/CPANMDIRs.txt); do echo "Added cpanm $path"; export PATH=$path:$PATH; done
           which cpanm
-          echo "CPANM - start"
           cpanm -l $HOME --installdeps --verbose --force .
-          echo "CPANM - done"
-          echo "CPANM - start direct installation of File::Which"
-          cpanm -l $HOME File::Which --force --notest
-          echo "CPANM - done"
-          locate Which.pm || true
-          find $HOME -name Which.pm || true
-          perl -MFile::Which -MData::Dumper -e 'print Dumper \%INC'
+          cpanm -l $HOME File::Which --force --notest --verbose
+          cpanm -l $HOME Spreadsheet::XLSX --force --notest --verbose  
+          cpanm -l $HOME Array::IntSpan --force --notest --verbose
+#          find $HOME -name Which.pm || true
+          perl -MFile::Which -MData::Dumper -MSpreadsheet::XLSX -MArray::IntSpan -e 'print Dumper \%INC'
       - id: prove-lv-t
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
