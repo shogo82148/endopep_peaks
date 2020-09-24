@@ -23,9 +23,16 @@ jobs:
         with:
           perl-version: ${{ matrix.perl }}
       - run: perl -V
+      - id:  install-cpanm
+        run: |
+          curl -L https://cpanmin.us | perl - --sudo App::cpanminus
+          export PATH=$PATH:/usr/local/bin
+          which cpanm
       - id:  cpanm
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
+          export PATH=$PATH:/usr/local/bin
+          which cpanm
           echo "CPANM - start"
           cpanm -l $HOME --installdeps --verbose --force .
           echo "CPANM - done"
