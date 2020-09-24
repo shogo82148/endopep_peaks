@@ -33,7 +33,12 @@ jobs:
           #find /bin /usr/ $HOME $GITHUB_WORKSPACE -name cpanm -exec {} --version \;
           which cpanm
           CPANMPATH=$(which cpanm)
-          find $HOME/.cpanm -type f -executable -name cpanm -exec cp -v {} $CPANMPATH \;
+          find $HOME/.cpanm -type f -executable -name cpanm | xargs -P 1 -n 1 bash -c '
+            dirname $0
+          ' > $HOME/CPANMDIRs.txt
+          for path in $(cat $HOME/CPANMDIRs.txt); do
+            export PATH=$path:$PATH
+          done
       - id:  cpanm
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
