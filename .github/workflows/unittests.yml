@@ -24,6 +24,9 @@ jobs:
           perl-version: ${{ matrix.perl }}
       - run: perl -V
       - run: env
+      - run: |
+          perl Makefile.PL
+          cat MYMETA.json | jq .
       - id: cpanm
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
