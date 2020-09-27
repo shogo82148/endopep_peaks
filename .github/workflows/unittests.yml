@@ -25,6 +25,7 @@ jobs:
       - run: perl -V
       - run: env
       - run: |
+          cpanm --verbose --notest --force ExtUtils::MakeMaker
           perl Makefile.PL
           cat MYMETA.json | jq .
       - id: cpanm
