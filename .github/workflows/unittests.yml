@@ -3,7 +3,6 @@ on:
     branches:
       - master
 
-
 # perl: [ '5.32', '5.30', '5.28' ]
 # perl: [ '5.32', '5.30.1', '5.16.3', '5.12.3' ]
 # os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
@@ -13,8 +12,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-latest']
-        perl: [ '5.16.3' ]
+        os: ["ubuntu-latest"]
+        perl: ["5.16.3"]
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -24,25 +23,10 @@ jobs:
           perl-version: ${{ matrix.perl }}
       - run: perl -V
       - run: env
-#      - id:  install-cpanm
-#        run: |
-#          curl -L https://cpanmin.us | perl - App::cpanminus
-#          # installs to something like /home/runner/.cpanm/work/1600962463.2588/App-cpanminus-1.7044/bin/cpanm
-#          which cpanm
-#          CPANMPATH=$(which cpanm)
-#          find $HOME/.cpanm -type f -executable -name cpanm | xargs -P 1 -n 1 bash -c ' echo "dir of $0" >&2; dirname $0 ' | tee $HOME/CPANMDIRs.txt
-#          for path in $(cat $HOME/CPANMDIRs.txt); do echo "Added $path"; export PATH=$path:$PATH; done
-#          echo $PATH
-#          which cpanm
-      - id:  cpanm
+      - id: cpanm
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
-          which cpanm
           cpanm -l $HOME --installdeps --verbose --force .
-          cpanm -l $HOME File::Which --force --notest --verbose
-          cpanm -l $HOME Spreadsheet::XLSX --force --notest --verbose  
-          cpanm -l $HOME Array::IntSpan --force --notest --verbose
-          perl -MFile::Which -MData::Dumper -MSpreadsheet::XLSX -MArray::IntSpan -e 'print Dumper \%INC'
       - id: prove-lv-t
         run: |
           export PERL5LIB=$PERL5LIB:$HOME/lib/perl5
